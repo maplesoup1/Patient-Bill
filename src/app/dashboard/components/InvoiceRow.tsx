@@ -3,10 +3,13 @@ import React, { useState } from "react";
 import { Phone, Settings } from "lucide-react";
 import FollowUp from "./FollowUp";
 import SetRules from "./SetRules";
+import PatientInfoModal from "./PatientInfoModal";
+import { getPatientData } from "../../../data/activitiesData";
 
 interface Invoice {
   id: string;
   patient: string;
+  provider: string;
   appointment: string;
   overdue: boolean;
   days: string;
@@ -25,6 +28,7 @@ interface InvoiceRowProps {
 const InvoiceRow: React.FC<InvoiceRowProps> = ({ invoice, index, isSelected, onSelect }) => {
   const [isFollowUpOpen, setIsFollowUpOpen] = useState(false);
   const [isSetRulesOpen, setIsSetRulesOpen] = useState(false);
+  const [isPatientInfoOpen, setIsPatientInfoOpen] = useState(false);
 
   const handleselectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     const isChecked = e.target.checked;
@@ -46,34 +50,22 @@ const InvoiceRow: React.FC<InvoiceRowProps> = ({ invoice, index, isSelected, onS
     setIsSetRulesOpen(false);
   };
 
-  // 为 FollowUp 组件准备的 patientData（包含 activities）
-  const patientDataForFollowUp = {
-    name: invoice.patient,
-    phone: "+61 400 123 456",
-    appointment: invoice.appointment,
-    amount: invoice.amount,
-    status: invoice.days,
-    activities: [
-      {
-        id: "1",
-        type: "sms" as const,
-        description: "SMS sent to patient",
-        timestamp: "2 days ago",
-      },
-      {
-        id: "2",
-        type: "call" as const,
-        description: "Reception call attempted",
-        timestamp: "1 day ago",
-      },
-      {
-        id: "3",
-        type: "email" as const,
-        description: "Payment link sent via email",
-        timestamp: "4 hours ago",
-      },
-    ],
+  const handleStatusClick = () => {
+    setIsPatientInfoOpen(true);
   };
+
+  const closePatientInfo = () => {
+    setIsPatientInfoOpen(false);
+  };
+
+  // 为 FollowUp 组件准备的 patientData（包含 activities）
+  const patientDataForFollowUp = getPatientData(
+    invoice.patient,
+    "+61 400 123 456",
+    invoice.appointment,
+    invoice.amount,
+    invoice.days
+  );
 
   // 为 SetRules 组件准备的 patientData（不需要 activities）
   const patientDataForSetRules = {
@@ -82,6 +74,7 @@ const InvoiceRow: React.FC<InvoiceRowProps> = ({ invoice, index, isSelected, onS
     appointment: invoice.appointment,
     amount: invoice.amount,
     status: invoice.days,
+    invoiceId: invoice.id,
   };
 
   return (
@@ -100,6 +93,9 @@ const InvoiceRow: React.FC<InvoiceRowProps> = ({ invoice, index, isSelected, onS
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
           {invoice.patient}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+          {invoice.provider}
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
           <div>
@@ -120,7 +116,8 @@ const InvoiceRow: React.FC<InvoiceRowProps> = ({ invoice, index, isSelected, onS
         </td>
         <td className="px-6 py-4 whitespace-nowrap">
           <span
-            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${invoice.statusColor}`}
+            onClick={handleStatusClick}
+            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full cursor-pointer hover:opacity-80 transition-opacity ${invoice.statusColor}`}
           >
             {invoice.status}
           </span>
@@ -139,7 +136,7 @@ const InvoiceRow: React.FC<InvoiceRowProps> = ({ invoice, index, isSelected, onS
               className="text-gray-600 hover:text-gray-900 flex items-center space-x-1 transition-colors border-2 rounded-md p-2"
             >
               <Settings className="w-4 h-4" />
-              <span>Set rules</span>
+              <span>Set Sequence</span>
             </button>
           </div>
         </td>
@@ -157,6 +154,14 @@ const InvoiceRow: React.FC<InvoiceRowProps> = ({ invoice, index, isSelected, onS
         isOpen={isSetRulesOpen}
         onClose={closeSetRules}
         patient={patientDataForSetRules}
+        invoiceId={invoice.id}
+      />
+
+      {/* Patient Info Modal */}
+      <PatientInfoModal
+        isOpen={isPatientInfoOpen}
+        onClose={closePatientInfo}
+        patient={patientDataForFollowUp}
       />
     </>
   );

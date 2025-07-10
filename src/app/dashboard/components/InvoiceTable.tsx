@@ -2,11 +2,13 @@
 import React from 'react';
 import SearchAndFilterBar from './SearchAndFilterBar';
 import InvoiceRow from './InvoiceRow';
+import Pagination from './Pagination';
 import { useState,useEffect } from 'react';
 
 interface Invoice {
   id: string;
   patient: string;
+  provider: string;
   appointment: string;
   overdue: boolean;
   days: string;
@@ -30,6 +32,9 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
   statusFilter, 
   setStatusFilter 
 }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
   const filteredInvoices = invoices.filter(invoice => {
     const matchesSearch = invoice.patient.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          invoice.id.toLowerCase().includes(searchTerm.toLowerCase());
@@ -37,24 +42,39 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
     return matchesSearch && matchesStatus;
   });
 
+  const totalPages = Math.ceil(filteredInvoices.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentInvoices = filteredInvoices.slice(startIndex, endIndex);
+
   const [selectedInvoices, setSelectedInvoices] = useState<Set<string>>(new Set());
-const [selectAll, setSelectAll] = useState(false);
+  const [selectAll, setSelectAll] = useState(false);
 
   const tableHeaders = [
     { key: 'checkbox', label: '', width: 'w-12' },
     { key: 'invoice', label: 'Invoice Number', width: 'w-32' },
     { key: 'patient', label: 'Patients', width: 'w-48' },
-    { key: 'appointment', label: 'Appointment', width: 'w-48' },
+    { key: 'Provider', label: 'Service Provider', width: 'w-32' },
+    { key: 'appointment', label: 'Service date', width: 'w-48' },
     { key: 'amount', label: 'Amount', width: 'w-24' },
     { key: 'status', label: 'Status', width: 'w-32' },
     { key: 'actions', label: 'Actions', width: 'w-48' }
   ];
 
   useEffect(() => {
-    const allIds = filteredInvoices.map((inv) => inv.id);
-    const allSelected = allIds.every((id) => selectedInvoices.has(id));
+    const allIds = currentInvoices.map((inv) => inv.id);
+    const allSelected = allIds.length > 0 && allIds.every((id) => selectedInvoices.has(id));
     setSelectAll(allSelected);
-  }, [selectedInvoices, filteredInvoices]);
+  }, [selectedInvoices, currentInvoices]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
+
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1);
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -88,7 +108,7 @@ const [selectAll, setSelectAll] = useState(false);
                       const isChecked = e.target.checked;
                       setSelectAll(isChecked);
                       if (isChecked) {
-                        const allIds = new Set(filteredInvoices.map(inv => inv.id));
+                        const allIds = new Set(currentInvoices.map(inv => inv.id));
                         setSelectedInvoices(allIds);
                       } else {
                         setSelectedInvoices(new Set());
@@ -104,11 +124,11 @@ const [selectAll, setSelectAll] = useState(false);
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-          {filteredInvoices.map((invoice, index) => (
+          {currentInvoices.map((invoice, index) => (
   <InvoiceRow
     key={`${invoice.id}-${index}`}
     invoice={invoice}
-    index={index}
+    index={startIndex + index}
     isSelected={selectedInvoices.has(invoice.id)}
     onSelect={(isChecked) => {
       const newSelected = new Set(selectedInvoices);
@@ -116,7 +136,7 @@ const [selectAll, setSelectAll] = useState(false);
         newSelected.add(invoice.id);
       } else {
         newSelected.delete(invoice.id);
-        setSelectAll(false); // 一旦取消一个，取消全选状态
+        setSelectAll(false);
       }
       setSelectedInvoices(newSelected);
     }}
@@ -126,6 +146,17 @@ const [selectAll, setSelectAll] = useState(false);
           </tbody>
         </table>
       </div>
+      
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={filteredInvoices.length}
+        itemsPerPage={itemsPerPage}
+        onPageChange={setCurrentPage}
+        onItemsPerPageChange={handleItemsPerPageChange}
+        showingStart={startIndex + 1}
+        showingEnd={Math.min(endIndex, filteredInvoices.length)}
+      />
     </div>
   );
 };
