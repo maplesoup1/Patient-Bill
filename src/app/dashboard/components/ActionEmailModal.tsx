@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { X, Mail, Paperclip } from 'lucide-react';
 import { WorkCoverInvoice } from '../../../data/types';
+import { useClickOutside } from '../../../hooks/useClickOutside';
 
 interface ActionEmailModalProps {
   isOpen: boolean;
@@ -20,6 +21,11 @@ This is a follow-up regarding invoice ${invoice.id} for ${invoice.patient}, date
 Please advise on payment status.
 
 Thank you.`);
+
+  const modalRef = useClickOutside<HTMLDivElement>({
+    onClickOutside: onClose,
+    enabled: isOpen,
+  });
 
   if (!isOpen) return null;
 
@@ -88,7 +94,10 @@ Thank you.`);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+      <div 
+        ref={modalRef}
+        className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto"
+      >
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center space-x-2">
             <Mail className="w-5 h-5 text-blue-600" />

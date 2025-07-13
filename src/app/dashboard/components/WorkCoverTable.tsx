@@ -20,6 +20,7 @@ const WorkCoverTable: React.FC<WorkCoverTableProps> = ({
   setStatusFilter 
 }) => {
   const [selectedInvoices, setSelectedInvoices] = useState<Set<string>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
   const [showPaid, setShowPaid] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -47,6 +48,7 @@ const WorkCoverTable: React.FC<WorkCoverTableProps> = ({
   const currentInvoices = filteredInvoices.slice(startIndex, endIndex);
 
   const tableHeaders = [
+    { key: 'checkbox', label: '', width: 'w-12' },
     { key: 'number', label: '#', width: 'w-12' },
     { key: 'invoice', label: 'Invoice ID', width: 'w-28' },
     { key: 'patient', label: 'Patients', width: 'w-36' },
@@ -56,7 +58,7 @@ const WorkCoverTable: React.FC<WorkCoverTableProps> = ({
     { key: 'invoiceCreatedDate', label: 'Invoice Created', width: 'w-32' },
     { key: 'dueDate', label: 'Due Date', width: 'w-32' },
     { key: 'amount', label: 'Amount', width: 'w-24' },
-    { key: 'communicationStatus', label: 'Communication Status', width: 'w-44' },
+    { key: 'communicationStatus', label:'Communication Status', width: 'w-44' },
     { key: 'paymentStatus', label: 'Payment Status', width: 'w-32' },
     { key: 'actions', label: 'Remittance Actions', width: 'w-48' }
   ];
@@ -64,6 +66,12 @@ const WorkCoverTable: React.FC<WorkCoverTableProps> = ({
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, statusFilter, showPaid]);
+
+  useEffect(() => {
+    const allIds = currentInvoices.map((inv: WorkCoverInvoice) => inv.id);
+    const allSelected = allIds.length > 0 && allIds.every((id: string) => selectedInvoices.has(id));
+    setSelectAll(allSelected);
+  }, [selectedInvoices, currentInvoices]);
 
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
     setItemsPerPage(newItemsPerPage);
@@ -120,7 +128,25 @@ const WorkCoverTable: React.FC<WorkCoverTableProps> = ({
                   key={header.key}
                   className={`px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${header.width}`}
                 >
-                  {header.label}
+                  {header.key === 'checkbox' ? (
+                    <input
+                      type="checkbox"
+                      className="rounded border-gray-300"
+                      checked={selectAll}
+                      onChange={(e) => {
+                        const isChecked = e.target.checked;
+                        setSelectAll(isChecked);
+                        if (isChecked) {
+                          const allIds = new Set(currentInvoices.map(inv => inv.id));
+                          setSelectedInvoices(allIds);
+                        } else {
+                          setSelectedInvoices(new Set());
+                        }
+                      }}
+                    />
+                  ) : (
+                    header.label
+                  )}
                 </th>
               ))}
             </tr>
@@ -138,6 +164,7 @@ const WorkCoverTable: React.FC<WorkCoverTableProps> = ({
                     newSelected.add(invoice.id);
                   } else {
                     newSelected.delete(invoice.id);
+                    setSelectAll(false);
                   }
                   setSelectedInvoices(newSelected);
                 }}

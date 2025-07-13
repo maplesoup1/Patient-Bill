@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import StatsGrid from './components/StatsGrid';
+import WorkCoverStatsGrid from './components/WorkCoverStatsGrid';
 import FilterTabs from './components/Filter';
 import TimePeriodSelector from './components/TimePeriodSelector';
 import InvoiceTable from './components/InvoiceTable';
@@ -84,13 +85,16 @@ const Dashboard = () => {
                 />
               </>
             ) : (
-              <WorkCoverTable
-                invoices={currentWorkcoverInvoices}
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                statusFilter={statusFilter}
-                setStatusFilter={setStatusFilter}
-              />
+              <>
+                <WorkCoverStatsGrid invoices={currentWorkcoverInvoices} />
+                <WorkCoverTable
+                  invoices={currentWorkcoverInvoices}
+                  searchTerm={searchTerm}
+                  setSearchTerm={setSearchTerm}
+                  statusFilter={statusFilter}
+                  setStatusFilter={setStatusFilter}
+                />
+              </>
             )}
           </>
         )}

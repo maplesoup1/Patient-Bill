@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PaginationProps {
   currentPage: number;
@@ -83,7 +84,7 @@ const Pagination: React.FC<PaginationProps> = ({
               currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
-            Previous
+            <ChevronLeft className="w-4 h-4" />
           </button>
           
           {getVisiblePages().map((page, index) => (
@@ -112,7 +113,7 @@ const Pagination: React.FC<PaginationProps> = ({
               currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
-            Next
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       )}

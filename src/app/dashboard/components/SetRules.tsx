@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { X, ChevronDown, MessageSquare, Phone, Mail, Clock, AlertCircle, Plus } from 'lucide-react';
+import { useClickOutside } from '../../../hooks/useClickOutside';
 
 interface Patient {
   name: string;
@@ -23,6 +24,11 @@ const SetRules: React.FC<SetRulesProps> = ({ isOpen, onClose, patient, invoiceId
   const [activateSequence, setActivateSequence] = useState(true);
   const [aiCallDays, setAiCallDays] = useState(5);
   const [reminderHours, setReminderHours] = useState(48);
+
+  const modalRef = useClickOutside<HTMLDivElement>({
+    onClickOutside: onClose,
+    enabled: isOpen,
+  });
   const [skipWeekends, setSkipWeekends] = useState(true);
 
   if (!isOpen) return null;
@@ -74,7 +80,10 @@ const SetRules: React.FC<SetRulesProps> = ({ isOpen, onClose, patient, invoiceId
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+      <div 
+        ref={modalRef}
+        className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto"
+      >
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">Set Sequence</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
@@ -200,24 +209,18 @@ const SetRules: React.FC<SetRulesProps> = ({ isOpen, onClose, patient, invoiceId
                 <div className="flex items-center space-x-3">
                   <Clock className="w-4 h-4 text-purple-600" />
                   <span className="text-sm text-gray-900">Skip weekends</span>
-                  <button
-                    onClick={() => setSkipWeekends(!skipWeekends)}
-                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                      skipWeekends ? 'bg-blue-600' : 'bg-gray-300'
-                    }`}
-                  >
-                    <span
-                      className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
-                        skipWeekends ? 'translate-x-5' : 'translate-x-1'
-                      }`}
-                    />
-                  </button>
                 </div>
-                <button 
-                  className="text-gray-400 hover:text-gray-600"
-                  onClick={() => {/* Remove this rule */}}
+                <button
+                  onClick={() => setSkipWeekends(!skipWeekends)}
+                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                    skipWeekends ? 'bg-blue-600' : 'bg-gray-300'
+                  }`}
                 >
-                  <X className="w-4 h-4" />
+                  <span
+                    className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                      skipWeekends ? 'translate-x-5' : 'translate-x-1'
+                    }`}
+                  />
                 </button>
               </div>
 

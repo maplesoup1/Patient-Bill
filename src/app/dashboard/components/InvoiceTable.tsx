@@ -15,6 +15,12 @@ interface Invoice {
   amount: number;
   status: string;
   statusColor: string;
+  progressSteps: {
+    email: boolean;
+    sms: boolean;
+    ai: boolean;
+    phone: boolean;
+  };
 }
 
 interface InvoiceTableProps {
@@ -58,6 +64,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
     { key: 'appointment', label: 'Service date', width: 'w-48' },
     { key: 'amount', label: 'Amount', width: 'w-24' },
     { key: 'status', label: 'Status', width: 'w-32' },
+    { key: 'progress', label: 'Progress', width: 'w-32' },
     { key: 'actions', label: 'Actions', width: 'w-48' }
   ];
 

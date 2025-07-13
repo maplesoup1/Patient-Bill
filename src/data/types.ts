@@ -8,6 +8,12 @@ export interface Invoice {
   amount: number;
   status: string;
   statusColor: string;
+  progressSteps: {
+    email: boolean;
+    sms: boolean;
+    ai: boolean;
+    phone: boolean;
+  };
 }
 
 export interface WorkCoverInvoice {

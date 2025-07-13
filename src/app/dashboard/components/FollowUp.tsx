@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { X, MessageSquare, Mail, Phone, Zap, XCircle, CheckCircle, Copy, Clock, ChevronDown } from 'lucide-react';
+import { useClickOutside } from '../../../hooks/useClickOutside';
 
 interface Patient {
   name: string;
@@ -25,6 +26,11 @@ const FollowUp: React.FC<FollowUpProps> = ({ isOpen, onClose, patient }) => {
   const [callOutcome, setCallOutcome] = useState<'failed' | 'success' | null>(null);
   const [showTimeDropdown, setShowTimeDropdown] = useState(false);
   const [showRepeatDropdown, setShowRepeatDropdown] = useState(false);
+
+  const modalRef = useClickOutside<HTMLDivElement>({
+    onClickOutside: onClose,
+    enabled: isOpen,
+  });
 
   const stripePaymentLink = 'https://pay.stripe.com/invoice/test_inv_1H...';
 
@@ -78,7 +84,10 @@ const FollowUp: React.FC<FollowUpProps> = ({ isOpen, onClose, patient }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+      <div 
+        ref={modalRef}
+        className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto"
+      >
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">Follow Up {patient.name}</h2>
           <button

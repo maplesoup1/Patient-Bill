@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { X, Clock, ChevronDown } from 'lucide-react';
 import { WorkCoverInvoice } from '../../../data/types';
+import { useClickOutside } from '../../../hooks/useClickOutside';
 
 interface SequenceRulesModalProps {
   isOpen: boolean;
@@ -13,6 +14,11 @@ const SequenceRulesModal: React.FC<SequenceRulesModalProps> = ({ isOpen, onClose
   const [initialDelay, setInitialDelay] = useState(9);
   const [repeatInterval, setRepeatInterval] = useState(14);
   const [maxAttempts, setMaxAttempts] = useState(3);
+
+  const modalRef = useClickOutside<HTMLDivElement>({
+    onClickOutside: onClose,
+    enabled: isOpen,
+  });
 
   if (!isOpen) return null;
 
@@ -87,7 +93,10 @@ const SequenceRulesModal: React.FC<SequenceRulesModalProps> = ({ isOpen, onClose
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+      <div 
+        ref={modalRef}
+        className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto"
+      >
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center space-x-2">
             <Clock className="w-5 h-5 text-blue-600" />

@@ -10,7 +10,13 @@ export const patientsInvoices: Invoice[] = [
     status: 'Text x2',
     statusColor: 'bg-purple-100 text-purple-800',
     overdue: true,
-    days: '3 days overdue'
+    days: '3 days overdue',
+    progressSteps: {
+      email: true,
+      sms: true,
+      ai: false,
+      phone: false
+    }
   },
   {
     id: 'INV-003',
@@ -21,7 +27,13 @@ export const patientsInvoices: Invoice[] = [
     status: 'Prompt Sent',
     statusColor: 'bg-green-100 text-green-800',
     overdue: false,
-    days: 'Upcoming due'
+    days: 'Upcoming due',
+    progressSteps: {
+      email: true,
+      sms: false,
+      ai: false,
+      phone: false
+    }
   },
   {
     id: 'INV-006',
@@ -32,7 +44,13 @@ export const patientsInvoices: Invoice[] = [
     status: 'Call Failed',
     statusColor: 'bg-red-100 text-red-800',
     overdue: false,
-    days: 'Upcoming due'
+    days: 'Upcoming due',
+    progressSteps: {
+      email: true,
+      sms: true,
+      ai: true,
+      phone: false
+    }
   },
   {
     id: 'INV-004',
@@ -43,7 +61,13 @@ export const patientsInvoices: Invoice[] = [
     status: 'AI Scheduled',
     statusColor: 'bg-blue-100 text-blue-800',
     overdue: false,
-    days: 'Upcoming due'
+    days: 'Upcoming due',
+    progressSteps: {
+      email: true,
+      sms: true,
+      ai: true,
+      phone: false
+    }
   },
   {
     id: 'INV-008',
@@ -54,6 +78,29 @@ export const patientsInvoices: Invoice[] = [
     status: 'Text x2',
     statusColor: 'bg-purple-100 text-purple-800',
     overdue: false,
-    days: 'On time'
-  }
+    days: 'On time',
+    progressSteps: {
+      email: true,
+      sms: true,
+      ai: false,
+      phone: false
+    }
+  },
+  {
+    id: 'INV-008',
+    patient: 'David Brown',
+    provider: 'Dr. Wilson',
+    appointment: '2025-06-23, 09:45 AM',
+    amount: 320.25,
+    status: 'Text x2',
+    statusColor: 'bg-purple-100 text-purple-800',
+    overdue: false,
+    days: 'On time',
+    progressSteps: {
+      email: true,
+      sms: true,
+      ai: false,
+      phone: false
+    }
+  },
 ];
