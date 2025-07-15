@@ -6,12 +6,19 @@ import StatsCard from './StatsCard';
 interface Invoice {
   id: string;
   patient: string;
+  provider: string;
   appointment: string;
   amount: number;
   status: string;
   statusColor: string;
   overdue: boolean;
   days: string;
+  progressSteps: {
+    email: boolean;
+    sms: boolean;
+    ai: boolean;
+    phone: boolean;
+  };
 }
 
 interface StatsGridProps {
@@ -28,43 +35,30 @@ const StatsGrid: React.FC<StatsGridProps> = ({ invoices }) => {
     {
       title: 'Total Outstanding',
       value: `$${totalOutstanding.toFixed(2)}`,
-      icon: DollarSign,
       iconBgColor: 'bg-green-100',
       iconColor: 'text-green-600'
     },
     {
       title: 'Unpaid Invoices',
       value: unpaidInvoices,
-      icon: FileText,
       iconBgColor: 'bg-blue-100',
       iconColor: 'text-blue-600'
     },
     {
       title: 'Overdue Invoices',
       value: overdueInvoices,
-      icon: AlertCircle,
       iconBgColor: 'bg-red-100',
       iconColor: 'text-red-600'
     },
-    {
-      title: 'Payment links sent',
-      value: paymentLinksSent,
-      icon: MessageSquare,
-      iconBgColor: 'bg-purple-100',
-      iconColor: 'text-purple-600'
-    }
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       {stats.map((stat) => (
         <StatsCard 
           key={stat.title}
           title={stat.title}
           value={stat.value}
-          icon={stat.icon}
-          iconBgColor={stat.iconBgColor}
-          iconColor={stat.iconColor}
         />
       ))}
     </div>

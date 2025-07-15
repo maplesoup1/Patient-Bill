@@ -1,13 +1,25 @@
 'use client'
-import React, { useState } from 'react';
+import React from 'react';
 
-const FilterTabs = () => {
-    const [activeTab, setActiveTab] = useState('Patients');
-    
+interface FilterTabsProps {
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+  patientsCount: number;
+  workcoverCount: number;
+  othersCount?: number;
+}
+
+const FilterTabs: React.FC<FilterTabsProps> = ({ 
+  activeTab, 
+  onTabChange, 
+  patientsCount, 
+  workcoverCount, 
+  othersCount = 0 
+}) => {
     const tabs = [
-      { name: 'Patients', count: 8 },
-      { name: 'Workcover', count: 7 },
-      { name: 'Others', count: 0 }
+      { name: 'Patients', count: patientsCount },
+      { name: 'Workcover', count: workcoverCount },
+      { name: 'Others', count: othersCount }
     ];
   
     return (
@@ -15,7 +27,7 @@ const FilterTabs = () => {
         {tabs.map((tab) => (
           <button
             key={tab.name}
-            onClick={() => setActiveTab(tab.name)}
+            onClick={() => onTabChange(tab.name)}
             className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
               activeTab === tab.name
                 ? 'text-gray-900 bg-white shadow-sm'

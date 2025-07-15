@@ -1,111 +1,103 @@
 'use client';
 import React, { useState } from 'react';
-import Header from './components/Header';
 import StatsGrid from './components/StatsGrid';
+import WorkCoverStatsGrid from './components/WorkCoverStatsGrid';
 import FilterTabs from './components/Filter';
 import TimePeriodSelector from './components/TimePeriodSelector';
 import InvoiceTable from './components/InvoiceTable';
+import WorkCoverTable from './components/WorkCoverTable';
+import { patientsInvoices } from '../../data/patientsData';
+import { workcoverInvoices } from '../../data/workcoverData';
 
 const Dashboard = () => {
-  const [selectedFilter, setSelectedFilter] = useState('This month');
+  const [selectedFilter, setSelectedFilter] = useState('Date range');
+  const [selectedOverdue, setSelectedOverdue] = useState('Overdue by');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [selectedDashboard, setSelectedDashboard] = useState('Patients');
 
-  const invoices = [
-    {
-      id: 'INV-005',
-      patient: 'Sarah Johnson',
-      appointment: '2025-06-20, 10:30 AM',
-      amount: 285.50,
-      status: 'Text x2',
-      statusColor: 'bg-purple-100 text-purple-800',
-      overdue: true,
-      days: '3 days overdue'
-    },
-    {
-      id: 'INV-003',
-      patient: 'Michael Smith',
-      appointment: '2025-06-27, 10:30 AM',
-      amount: 315.00,
-      status: 'Prompt Sent',
-      statusColor: 'bg-green-100 text-green-800',
-      overdue: false,
-      days: 'Upcoming due'
-    },
-    {
-      id: 'INV-006',
-      patient: 'Emily Davis',
-      appointment: '2025-07-01, 01:45 PM',
-      amount: 330.40,
-      status: 'Call Failed',
-      statusColor: 'bg-red-100 text-red-800',
-      overdue: false,
-      days: 'Upcoming due'
-    },
-    {
-      id: 'INV-004',
-      patient: 'Linda Taylor',
-      appointment: '2025-06-30, 09:00 AM',
-      amount: 355.80,
-      status: 'AI Scheduled',
-      statusColor: 'bg-blue-100 text-blue-800',
-      overdue: false,
-      days: 'Upcoming due'
-    },
-    {
-      id: 'INV-008',
-      patient: 'David Brown',
-      appointment: '2025-06-23, 09:45 AM',
-      amount: 320.25,
-      status: 'Text x2',
-      statusColor: 'bg-purple-100 text-purple-800',
-      overdue: false,
-      days: 'On time'
-    },
-    {
-      id: 'INV-009',
-      patient: 'Daniel Martinez',
-      appointment: '2025-06-25, 03:30 PM',
-      amount: 360.00,
-      status: 'Text x2',
-      statusColor: 'bg-purple-100 text-purple-800',
-      overdue: false,
-      days: 'Upcoming due'
-    },
-    {
-      id: 'INV-010',
-      patient: 'Daniel Martinez',
-      appointment: '2025-06-25, 03:30 PM',
-      amount: 360.00,
-      status: 'Text x2',
-      statusColor: 'bg-purple-100 text-purple-800',
-      overdue: false,
-      days: 'Upcoming due'
+  const handleTabChange = (tab: string) => {
+    setSelectedDashboard(tab);
+  };
+
+  const getCurrentPatientsInvoices = () => {
+    if (selectedDashboard === 'Patients') {
+      return patientsInvoices;
     }
-  ];
+    return [];
+  };
+
+  const getCurrentWorkcoverInvoices = () => {
+    if (selectedDashboard === 'Workcover') {
+      return workcoverInvoices;
+    }
+    return [];
+  };
+
+  const getDashboardTitle = () => {
+    if (selectedDashboard === 'Patients') {
+      return 'Main Patients Dashboard';
+    } else if (selectedDashboard === 'Workcover') {
+      return 'WorkCover Claims Dashboard';
+    }
+    return 'Dashboard';
+  };
+
+  const currentPatientsInvoices = getCurrentPatientsInvoices();
+  const currentWorkcoverInvoices = getCurrentWorkcoverInvoices();
 
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="px-6 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Dashboard</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">{getDashboardTitle()}</h1>
 
         <div className="flex items-center justify-between mb-8">
-          <FilterTabs />
+          <FilterTabs 
+            activeTab={selectedDashboard} 
+            onTabChange={handleTabChange}
+            patientsCount={patientsInvoices.length}
+            workcoverCount={workcoverInvoices.length}
+            othersCount={0}
+          />
           <TimePeriodSelector 
             selectedFilter={selectedFilter} 
-            setSelectedFilter={setSelectedFilter} 
+            setSelectedFilter={setSelectedFilter}
+            selectedOverdue={selectedOverdue}
+            setSelectedOverdue={setSelectedOverdue}
           />
         </div>
 
-        <StatsGrid invoices={invoices} />
-
-        <InvoiceTable
-          invoices={invoices}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-        />
+        {selectedDashboard === 'Others' ? (
+          <div className="text-center py-8">
+            <p className="text-gray-500">Others dashboard coming soon...</p>
+          </div>
+        ) : (
+          <>
+            {selectedDashboard === 'Patients' ? (
+              <>
+                <StatsGrid invoices={currentPatientsInvoices} />
+                <InvoiceTable
+                  invoices={currentPatientsInvoices}
+                  searchTerm={searchTerm}
+                  setSearchTerm={setSearchTerm}
+                  statusFilter={statusFilter}
+                  setStatusFilter={setStatusFilter}
+                />
+              </>
+            ) : (
+              <>
+                <WorkCoverStatsGrid invoices={currentWorkcoverInvoices} />
+                <WorkCoverTable
+                  invoices={currentWorkcoverInvoices}
+                  searchTerm={searchTerm}
+                  setSearchTerm={setSearchTerm}
+                  statusFilter={statusFilter}
+                  setStatusFilter={setStatusFilter}
+                />
+              </>
+            )}
+          </>
+        )}
       </main>
     </div>
   );

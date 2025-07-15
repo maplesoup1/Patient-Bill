@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
-import { X, MessageSquare, Mail, XCircle, CheckCircle } from 'lucide-react';
+import { X, MessageSquare, Mail, Phone, Zap, XCircle, CheckCircle, Copy, Clock, ChevronDown } from 'lucide-react';
+import { useClickOutside } from '../../../hooks/useClickOutside';
 
 interface Patient {
   name: string;
@@ -17,18 +18,46 @@ interface FollowUpProps {
 }
 
 const FollowUp: React.FC<FollowUpProps> = ({ isOpen, onClose, patient }) => {
+  const [selectedFollowUp, setSelectedFollowUp] = useState<'sms' | 'email' | 'phone' | 'ai'>('sms');
+  const [sendTime, setSendTime] = useState('Send now');
+  const [repeatFrequency, setRepeatFrequency] = useState('Every week');
+  const [message, setMessage] = useState('Hi {{patientName}}, this is a reminder to complete your payment of {{amount}} for your appointment on {{date}}. You can pay using the link below.');
   const [callNotes, setCallNotes] = useState('');
-  const [enableAICalls, setEnableAICalls] = useState(true);
   const [callOutcome, setCallOutcome] = useState<'failed' | 'success' | null>(null);
+  const [showTimeDropdown, setShowTimeDropdown] = useState(false);
+  const [showRepeatDropdown, setShowRepeatDropdown] = useState(false);
+
+  const modalRef = useClickOutside<HTMLDivElement>({
+    onClickOutside: onClose,
+    enabled: isOpen,
+  });
+
+  const stripePaymentLink = 'https://pay.stripe.com/invoice/test_inv_1H...';
+
+  const timeOptions = [
+    'Send now',
+    'Send in 1 hour',
+    'Send in 2 hours',
+    'Send in 6 hours',
+    'Send tomorrow',
+    'Send in 3 days',
+    'Send in 1 week'
+  ];
+
+  const repeatOptions = [
+    'Never',
+    'Every day',
+    'Every 2 days',
+    'Every 3 days',
+    'Every week',
+    'Every 2 weeks',
+    'Every month'
+  ];
 
   if (!isOpen) return null;
 
-  const handleSendSMS = () => {
-    console.log('Sending SMS payment link');
-  };
-
-  const handleSendEmail = () => {
-    console.log('Sending Email payment link');
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(stripePaymentLink);
   };
 
   const handleMarkFailed = () => {
@@ -39,19 +68,26 @@ const FollowUp: React.FC<FollowUpProps> = ({ isOpen, onClose, patient }) => {
     setCallOutcome('success');
   };
 
-  const handleSaveChanges = () => {
-    console.log('Saving changes:', {
+  const handleSend = () => {
+    console.log('Sending follow-up:', {
+      type: selectedFollowUp,
+      sendTime,
+      repeatFrequency,
+      message,
       callNotes,
-      enableAICalls,
       callOutcome
     });
     onClose();
   };
 
+  const isAICallSelected = selectedFollowUp === 'ai';
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
-        {/* Header */}
+      <div 
+        ref={modalRef}
+        className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto"
+      >
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">Follow Up {patient.name}</h2>
           <button
@@ -62,9 +98,7 @@ const FollowUp: React.FC<FollowUpProps> = ({ isOpen, onClose, patient }) => {
           </button>
         </div>
 
-        {/* Content */}
         <div className="p-6">
-          {/* Patient Information */}
           <div className="mb-6">
             <h3 className="text-sm font-medium text-gray-900 mb-4">Patient Information</h3>
             
@@ -99,122 +133,209 @@ const FollowUp: React.FC<FollowUpProps> = ({ isOpen, onClose, patient }) => {
             )}
           </div>
 
-          {/* Send Payment Link */}
           <div className="mb-6">
-            <h3 className="text-sm font-medium text-gray-900 mb-3">Send Payment Link</h3>
-            <div className="flex space-x-2">
+            <h3 className="text-sm font-medium text-gray-900 mb-3">Follow-up with</h3>
+            <div className="flex flex-wrap gap-2">
               <button
-                onClick={handleSendSMS}
-                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                onClick={() => setSelectedFollowUp('sms')}
+                className={`flex items-center space-x-2 px-3 py-2 text-sm font-medium rounded-md border transition-colors ${
+                  selectedFollowUp === 'sms'
+                    ? 'bg-blue-50 border-blue-300 text-blue-700'
+                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
               >
                 <MessageSquare className="w-4 h-4" />
                 <span>SMS</span>
               </button>
               <button
-                onClick={handleSendEmail}
-                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                onClick={() => setSelectedFollowUp('email')}
+                className={`flex items-center space-x-2 px-3 py-2 text-sm font-medium rounded-md border transition-colors ${
+                  selectedFollowUp === 'email'
+                    ? 'bg-blue-50 border-blue-300 text-blue-700'
+                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
               >
                 <Mail className="w-4 h-4" />
                 <span>Email</span>
               </button>
-            </div>
-          </div>
-
-          {/* Call Notes */}
-          <div className="mb-6">
-            <h3 className="text-sm font-medium text-gray-900 mb-3">Call Notes</h3>
-            <textarea
-              value={callNotes}
-              onChange={(e) => setCallNotes(e.target.value)}
-              placeholder="Enter notes about the call conversation, patient response, payment arrangements, etc..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-              rows={4}
-            />
-          </div>
-
-          {/* Enable Veronica AI Call */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-medium text-gray-900">Enable Veronica AI Call</h3>
               <button
-                onClick={() => setEnableAICalls(!enableAICalls)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  enableAICalls ? 'bg-blue-600' : 'bg-gray-300'
+                onClick={() => setSelectedFollowUp('phone')}
+                className={`flex items-center space-x-2 px-3 py-2 text-sm font-medium rounded-md border transition-colors ${
+                  selectedFollowUp === 'phone'
+                    ? 'bg-blue-50 border-blue-300 text-blue-700'
+                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                 }`}
               >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    enableAICalls ? 'translate-x-6' : 'translate-x-1'
-                  }`}
-                />
+                <Phone className="w-4 h-4" />
+                <span>Phone</span>
+              </button>
+              <button
+                onClick={() => setSelectedFollowUp('ai')}
+                className={`flex items-center space-x-2 px-3 py-2 text-sm font-medium rounded-md border transition-colors ${
+                  selectedFollowUp === 'ai'
+                    ? 'bg-blue-50 border-blue-300 text-blue-700'
+                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <Zap className="w-4 h-4" />
+                <span>Schedule AI Call</span>
               </button>
             </div>
-            <p className="text-sm text-gray-600 mb-2">
-              Veronica AI will follow up with the patient via automated calls.{' '}
-              <button className="text-blue-600 hover:text-blue-800 underline">
-                Click here to set follow-up rules
-              </button>
-            </p>
-            
-            {enableAICalls && (
-              <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-                <p className="text-sm text-blue-800">
-                  Veronica AI will automatically call the patient starting 48 hours after the appointment, 
-                  repeating every 72 hours with up to 3 attempts.
-                </p>
-              </div>
-            )}
           </div>
 
-          {/* Call Outcomes */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-900 mb-2">
+              When should this be sent?
+            </label>
+            <div className="relative">
+              <button
+                onClick={() => setShowTimeDropdown(!showTimeDropdown)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-left flex items-center justify-between focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <span className="text-sm text-gray-700">{sendTime}</span>
+                <ChevronDown className="w-4 h-4 text-gray-500" />
+              </button>
+              {showTimeDropdown && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                  {timeOptions.map((option) => (
+                    <button
+                      key={option}
+                      onClick={() => {
+                        setSendTime(option);
+                        setShowTimeDropdown(false);
+                      }}
+                      className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 focus:bg-gray-50"
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-900 mb-2">
+              Repeat follow-up
+            </label>
+            <div className="relative">
+              <button
+                onClick={() => setShowRepeatDropdown(!showRepeatDropdown)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-left flex items-center justify-between focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <span className="text-sm text-gray-700">{repeatFrequency}</span>
+                <ChevronDown className="w-4 h-4 text-gray-500" />
+              </button>
+              {showRepeatDropdown && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                  {repeatOptions.map((option) => (
+                    <button
+                      key={option}
+                      onClick={() => {
+                        setRepeatFrequency(option);
+                        setShowRepeatDropdown(false);
+                      }}
+                      className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 focus:bg-gray-50"
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {!isAICallSelected && (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Message
+              </label>
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                rows={4}
+              />
+            </div>
+          )}
+
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-900 mb-2">
+              Stripe Payment Link
+            </label>
+            <div className="flex">
+              <input
+                type="text"
+                value={stripePaymentLink}
+                readOnly
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 text-sm text-gray-600"
+              />
+              <button
+                onClick={handleCopyLink}
+                className="px-3 py-2 bg-white border border-l-0 border-gray-300 rounded-r-md hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <Copy className="w-4 h-4 text-gray-500" />
+              </button>
+            </div>
+          </div>
+
+          {repeatFrequency !== 'Don\'t repeat' && (
+            <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-md">
+              <p className="text-sm text-blue-800">
+                Bill will be sent immediately, and repeated every 7 days until the payment is completed or the rule is disabled.
+              </p>
+            </div>
+          )}
+
           <div className="mb-6">
             <h3 className="text-sm font-medium text-gray-900 mb-3">Call Outcomes</h3>
-            
-            {callOutcome === 'failed' && (
-              <div className="flex items-center space-x-2 text-red-600">
-                <XCircle className="w-4 h-4" />
-                <span className="text-sm">This call marked as failed</span>
-              </div>
-            )}
-            
-            {callOutcome === 'success' && (
-              <div className="flex items-center space-x-2 text-green-600">
-                <CheckCircle className="w-4 h-4" />
-                <span className="text-sm">This call marked as success</span>
-              </div>
-            )}
-            
-            {!callOutcome && (
-              <p className="text-sm text-gray-500">No outcome recorded yet</p>
-            )}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-          <div className="flex justify-between items-center gap-4">
             <div className="flex space-x-2">
               <button
                 onClick={handleMarkFailed}
-                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className={`flex items-center space-x-2 px-3 py-2 text-sm font-medium rounded-md border transition-colors ${
+                  callOutcome === 'failed'
+                    ? 'bg-red-50 border-red-300 text-red-700'
+                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
               >
                 <XCircle className="w-4 h-4" />
                 <span>Mark as Failed</span>
               </button>
               <button
                 onClick={handleMarkSuccess}
-                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-green-700 bg-white border border-green-300 rounded-md hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className={`flex items-center space-x-2 px-3 py-2 text-sm font-medium rounded-md border transition-colors ${
+                  callOutcome === 'success'
+                    ? 'bg-green-50 border-green-300 text-green-700'
+                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
               >
                 <CheckCircle className="w-4 h-4" />
                 <span>Mark as Success</span>
               </button>
             </div>
+          </div>
 
+          <div className="mb-6">
+            <button className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-800">
+              <Clock className="w-4 h-4" />
+              <span>Follow-up History</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <div className="flex justify-end space-x-3">
             <button
-              onClick={handleSaveChanges}
+              onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              Save Changes
+              Close
+            </button>
+            <button
+              onClick={handleSend}
+              className="px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-md hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+            >
+              Send
             </button>
           </div>
         </div>
