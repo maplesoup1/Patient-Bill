@@ -1,7 +1,6 @@
 'use client';
 import React, { useState } from 'react';
 import StatsGrid from './StatsGrid';
-import FilterTabs from './Filter';
 import TimePeriodSelector from './TimePeriodSelector';
 import InvoiceTable from './InvoiceTable';
 
@@ -20,7 +19,13 @@ const PatientsDashboard = () => {
       status: 'Text x2',
       statusColor: 'bg-purple-100 text-purple-800',
       overdue: true,
-      days: '3 days overdue'
+      days: '3 days overdue',
+      progressSteps: {
+        email: true,
+        sms: true,
+        ai: false,
+        phone: false
+      }
     },
     {
       id: 'INV-002',
@@ -31,7 +36,13 @@ const PatientsDashboard = () => {
       status: 'Prompt Sent',
       statusColor: 'bg-green-100 text-green-800',
       overdue: false,
-      days: 'Upcoming due'
+      days: 'Upcoming due',
+      progressSteps: {
+        email: true,
+        sms: false,
+        ai: false,
+        phone: false
+      }
     },
     {
       id: 'INV-003',
@@ -42,7 +53,13 @@ const PatientsDashboard = () => {
       status: 'Call Failed',
       statusColor: 'bg-red-100 text-red-800',
       overdue: false,
-      days: 'Upcoming due'
+      days: 'Upcoming due',
+      progressSteps: {
+        email: true,
+        sms: true,
+        ai: true,
+        phone: true
+      }
     },
     {
       id: 'INV-004',
@@ -53,7 +70,13 @@ const PatientsDashboard = () => {
       status: 'AI Scheduled',
       statusColor: 'bg-blue-100 text-blue-800',
       overdue: false,
-      days: 'Upcoming due'
+      days: 'Upcoming due',
+      progressSteps: {
+        email: true,
+        sms: true,
+        ai: true,
+        phone: false
+      }
     },
     {
       id: 'INV-005',
@@ -64,7 +87,13 @@ const PatientsDashboard = () => {
       status: 'Text x2',
       statusColor: 'bg-purple-100 text-purple-800',
       overdue: false,
-      days: 'On time'
+      days: 'On time',
+      progressSteps: {
+        email: true,
+        sms: true,
+        ai: false,
+        phone: false
+      }
     }
   ];
 
